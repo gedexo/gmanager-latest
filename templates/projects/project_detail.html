@@ -1,0 +1,396 @@
+{% extends 'app/base.html' %}
+{% load static i18n crispy_forms_tags django_tables2 extras %}
+{% block title %}{{object}}: {{app_settings.site_title}}{% endblock %}
+
+{% block content %}
+
+<div class="side-app main-container detail_page">
+
+  <!--Page header-->
+  <div class="page-header row align-items-center">
+
+    <div class="page-leftheader col-md-6 ps-0">
+      <div class="page-title">{{object}}</div>
+    </div>
+
+    <div class="page-rightheader ms-md-auto col-md-6 pe-0">
+      <div class="text-md-end text-center btn-list">
+        <div class="nav nav-pills justify-content-end" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <button class="nav-link btn btn-pill me-2 mb-1 active" id="v-pills-overview-tab" data-bs-toggle="pill"
+            data-bs-target="#v-pills-overview" type="button" role="tab" aria-controls="v-pills-overview"
+            aria-selected="true">Overview</button>
+          <button class="nav-link btn btn-pill me-2 mb-1" id="v-pills-tasks-tab" data-bs-toggle="pill"
+            data-bs-target="#v-pills-tasks" type="button" role="tab" aria-controls="v-pills-tasks"
+            aria-selected="false">Tasks</button>
+          <button class="nav-link btn btn-pill me-2 mb-1" id="v-pills-table-tab" data-bs-toggle="pill"
+            data-bs-target="#v-pills-table" type="button" role="tab" aria-controls="v-pills-table"
+            aria-selected="false">Table</button>
+          <!-- <button class="nav-link btn btn-pill me-2 mb-1" id="v-pills-calendar-tab" data-bs-toggle="pill"
+            data-bs-target="#v-pills-calendar" type="button" role="tab" aria-controls="v-pills-calendar"
+            aria-selected="false">Calendar</button> -->
+
+          {% if object.discord_url %}
+          <a href="{{object.discord_url}}" target="_blank" class="btn me-2 mb-1 btn-white px-2 d-flex align-items-center"
+            title="Slack" style="width: 90px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0.9 0.9 725.6 198.3"><g fill="#7289da"><path d="M106.8 84.1c-5.7 0-10.2 4.9-10.2 11s4.6 11 10.2 11c5.7 0 10.2-4.9 10.2-11s-4.6-11-10.2-11zm-36.5 0c-5.7 0-10.2 4.9-10.2 11s4.6 11 10.2 11c5.7 0 10.2-4.9 10.2-11 .1-6.1-4.5-11-10.2-11z"/><path d="M155.4.9h-134C10.1.9.9 10.1.9 21.4v134c0 11.3 9.2 20.5 20.5 20.5h113.4l-5.3-18.3 12.8 11.8 12.1 11.1 21.6 18.7V21.4C175.9 10.1 166.7.9 155.4.9zm-38.6 129.5s-3.6-4.3-6.6-8c13.1-3.7 18.1-11.8 18.1-11.8-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.4-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.6-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.2-1.8-1-2.8-1.7-2.8-1.7s4.8 7.9 17.5 11.7c-3 3.8-6.7 8.2-6.7 8.2-22.1-.7-30.5-15.1-30.5-15.1C30.6 83.5 45 57.6 45 57.6c14.4-10.7 28-10.4 28-10.4l1 1.2c-18 5.1-26.2 13-26.2 13s2.2-1.2 5.9-2.8c10.7-4.7 19.2-5.9 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.5 0 0-7.9-7.5-24.9-12.6l1.4-1.6s13.7-.3 28 10.4c0 0 14.4 25.9 14.4 57.8 0-.1-8.4 14.3-30.5 15zm151-86.7h-33.2V81l22.1 19.9V64.7h11.8c7.5 0 11.2 3.6 11.2 9.4v27.7c0 5.8-3.5 9.7-11.2 9.7h-34v21.1h33.2c17.8.1 34.5-8.8 34.5-29.2V73.6c.1-20.8-16.6-29.9-34.4-29.9zm174 59.7V72.8c0-11 19.8-13.5 25.8-2.5l18.3-7.4c-7.2-15.8-20.3-20.4-31.2-20.4-17.8 0-35.4 10.3-35.4 30.3v30.6c0 20.2 17.6 30.3 35 30.3 11.2 0 24.6-5.5 32-19.9l-19.6-9c-4.8 12.3-24.9 9.3-24.9-1.4zM381.3 77c-6.9-1.5-11.5-4-11.8-8.3.4-10.3 16.3-10.7 25.6-.8l14.7-11.3c-9.2-11.2-19.6-14.2-30.3-14.2-16.3 0-32.1 9.2-32.1 26.6 0 16.9 13 26 27.3 28.2 7.3 1 15.4 3.9 15.2 8.9-.6 9.5-20.2 9-29.1-1.8l-14.2 13.3c8.3 10.7 19.6 16.1 30.2 16.1 16.3 0 34.4-9.4 35.1-26.6 1-21.7-14.8-27.2-30.6-30.1zm-67 55.5h22.4V43.7h-22.4zM692 43.7h-33.2V81l22.1 19.9V64.7h11.8c7.5 0 11.2 3.6 11.2 9.4v27.7c0 5.8-3.5 9.7-11.2 9.7h-34v21.1H692c17.8.1 34.5-8.8 34.5-29.2V73.6c0-20.8-16.7-29.9-34.5-29.9zm-162.9-1.2c-18.4 0-36.7 10-36.7 30.5v30.3c0 20.3 18.4 30.5 36.9 30.5 18.4 0 36.7-10.2 36.7-30.5V73c0-20.4-18.5-30.5-36.9-30.5zm14.4 60.8c0 6.4-7.2 9.7-14.3 9.7-7.2 0-14.4-3.1-14.4-9.7V73c0-6.5 7-10 14-10 7.3 0 14.7 3.1 14.7 10zM646.4 73c-.5-20.8-14.7-29.2-33-29.2h-35.5v88.8h22.7v-28.2h4l20.6 28.2h28L629 102.1c10.7-3.4 17.4-12.7 17.4-29.1zm-32.6 12h-13.2V64.7h13.2c14.1 0 14.1 20.3 0 20.3z"/></g></svg>
+          </a>
+          {% endif %}
+
+          <!-- <a href="javascript:void(0);" onclick="window.print();" class="btn me-2 mb-1 btn-white" title="Print"> <i
+              class="feather feather-printer"></i>
+          </a> -->
+          {% if can_edit %}
+          <a href="{{object.get_update_url}}" class="btn me-2 mb-1 btn-white" data-bs-placement="top"
+            data-bs-toggle="tooltip" title="Edit"> <i class="text-primary feather feather-edit-3"></i> </a>
+          {% endif %}
+
+          {% if can_delete %}
+          <a href="{{object.get_delete_url}}" class="btn me-2 mb-1 btn-white" data-bs-placement="top"
+            data-bs-toggle="tooltip" title="Delete"> <i class="text-danger feather feather-trash-2"></i> </a>
+          {% endif %}
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!--End Page header-->
+
+  <div class="tab-content w-100 mt-5" id="v-pills-tabContent">
+    <div class="tab-pane fade show active" id="v-pills-overview" role="tabpanel" aria-labelledby="v-pills-overview-tab">
+      <div class="row">
+
+        <div class="col-md-12">
+          <div class="card content_card">
+
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover info_table mb-0 border" style="width:100%;">
+                  <tbody>
+                    <tr>
+                      <td>Start Date : {{object.start_date}}</td>
+                      <td>End Date : {{object.end_date}}</td>
+                      <td>Department : {{object.department}}</td>
+                      {% if request.user.usertype == 'management' %}
+                      <td>Delivery Date : {{object.delivery_date}}</td>
+                      <td>Referred By : {{object.referred_by}}</td>
+                      {% endif %}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {% if object.details %}
+            <div class="card-body">
+              {{object.details|safe}}
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+
+        {% if attachments_table.paginated_rows %}
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Attachments</h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                {% render_table attachments_table 'django_tables2/basic.html' %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+
+    </div>
+    <div class="tab-pane fade" id="v-pills-tasks" role="tabpanel" aria-labelledby="v-pills-tasks-tab">
+      <div class="d-flex flex-nowrap" style="overflow-x: scroll;min-height: 85vh;">
+
+
+        <div class="card-parent" data-status="todo">
+          <div class="card">
+
+            <div class="list-header">
+              <h2 class="header-name">To Do</h2>
+            </div>
+            {% for task in tasks|filter_by_status:"todo" %}
+            <div class="subcard">
+              <div>
+                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
+              </div>
+              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
+              <div class="d-flex justify-content-start">
+                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
+                  title="{{task.assigned_to}}">
+                {% if task.start_from == task.end_before %}
+                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
+                {% else %}
+                <span class=" badge bg-success me-1">{{task.start_from}}</span>
+                <span class="badge bg-danger me-1">{{task.end_before}}</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+
+            <div class="list-footer">
+              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
+            </div>
+
+          </div>
+        </div>
+
+
+        <div class="card-parent" data-status="on_going">
+          <div class="card">
+            <div class="list-header">
+              <h2 class="header-name">On Going</h2>
+            </div>
+            {% for task in tasks|filter_by_status:"on_going" %}
+            <div class="subcard" draggable="true">
+              <div>
+                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
+              </div>
+              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
+              <div class="d-flex justify-content-start">
+                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
+                  title="{{task.assigned_to}}">
+                {% if task.start_from == task.end_before %}
+                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
+                {% else %}
+                <span class=" badge bg-success me-1">{{task.start_from}}</span>
+                <span class="badge bg-danger me-1">{{task.end_before}}</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+            <div class="list-footer">
+              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="card-parent" data-status="delayed">
+          <div class="card">
+            <div class="list-header">
+              <h2 class="header-name">On Going + Delay</h2>
+            </div>
+            {% for task in tasks|filter_by_status:"delayed" %}
+            <div class="subcard" draggable="true">
+              <div>
+                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
+              </div>
+              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
+              <div class="d-flex justify-content-start">
+                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
+                  title="{{task.assigned_to}}">
+                {% if task.start_from == task.end_before %}
+                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
+                {% else %}
+                <span class=" badge bg-success me-1">{{task.start_from}}</span>
+                <span class="badge bg-danger me-1">{{task.end_before}}</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+            <div class="list-footer">
+              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="card-parent" data-status="on_hold">
+          <div class="card">
+            <div class="list-header">
+              <h2 class="header-name">On
+                Hold</h2>
+            </div>
+            {% for task in tasks|filter_by_status:"on_hold" %}
+            <div class="subcard" draggable="true">
+              <div>
+                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
+              </div>
+              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
+              <div class="d-flex justify-content-start">
+                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
+                  title="{{task.assigned_to}}">
+                {% if task.start_from == task.end_before %}
+                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
+                {% else %}
+                <span class=" badge bg-success me-1">{{task.start_from}}</span>
+                <span class="badge bg-danger me-1">{{task.end_before}}</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+            <div class="list-footer">
+              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-parent" data-status="in_review">
+          <div class="card">
+            <div class="list-header">
+              <h2 class="header-name">In Review</h2>
+            </div>
+            {% for task in tasks|filter_by_status:"in_review" %}
+            <div class="subcard" draggable="true">
+              <div>
+                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
+              </div>
+              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
+              <div class="d-flex justify-content-start">
+                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
+                  title="{{task.assigned_to}}">
+                {% if task.start_from == task.end_before %}
+                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
+                {% else %}
+                <span class=" badge bg-success me-1">{{task.start_from}}</span>
+                <span class="badge bg-danger me-1">{{task.end_before}}</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+            <div class="list-footer">
+              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-parent" data-status="done">
+          <div class="card">
+            <div class="list-header">
+              <h2 class="header-name">Done</h2>
+            </div>
+            {% for task in tasks|filter_by_status:"done" %}
+            <div class="subcard" draggable="true">
+              <div>
+                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
+              </div>
+              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
+              <div class="d-flex justify-content-start">
+                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
+                  title="{{task.assigned_to}}">
+                {% if task.start_from == task.end_before %}
+                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
+                {% else %}
+                <span class=" badge bg-success me-1">{{task.start_from}}</span>
+                <span class="badge bg-danger me-1">{{task.end_before}}</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+            <div class="list-footer">
+              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="tab-pane fade" id="v-pills-table" role="tabpanel" aria-labelledby="v-pills-table-tab">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between w-100">
+              <h5 class="mb-0">Tasks</h5>
+              {% if can_add %}
+              <a href="{{new_link}}" class="btn btn-sm btn-white">
+                <i class="text-primary feather feather-plus"></i>
+              </a>
+              {% endif %}
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                {% render_table table 'django_tables2/basic.html' %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="v-pills-calendar" role="tabpanel" aria-labelledby="v-pills-calendar-tab">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Calendar</h5>
+            </div>
+            <div class="card-body p-0">
+              <div class='cal1'></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+{% endblock content %}
+
+{% block css_plugins %}
+<link rel="stylesheet" href="/static/app/plugins/calendar/calendar.css">
+{% endblock %}
+
+{% block js_plugins %}
+<script src="/static/app/plugins/calendar/underscore-min.js"></script>
+<script src="/static/app/plugins/calendar/moment.js"></script>
+<script src="/static/app/plugins/calendar/calendar.js"></script>
+<script src="/static/app/plugins/calendar/demo.js"></script>
+{% endblock %}
+
+{% block javascript %}
+<script>
+  isLoading = false;
+  $(document).on("change", ".task_update_form select", function (e) {
+    e.preventDefault();
+    var $this = $(this.closest("form"));
+    data = new FormData($this[0]),
+      action_url = $this.attr("action");
+
+    if (!isLoading) {
+      isLoading = true;
+      var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+      $.ajax({
+        url: action_url,
+        type: "POST",
+        data: data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        headers: {
+          "X-CSRFToken": csrfToken
+        },
+        success: function (data) {
+          var status = data.status;
+          var title = data.title;
+          var message = data.message;
+          if (status == "success") {
+            window.location.reload();
+          } else {
+            title ? (title = title) : (title = "An Error Occurred");
+          }
+        },
+        error: function (data) {
+          var title = "An error occurred", message = "something went wrong";
+        },
+      }).then(function (response) {
+        isLoading = false;
+      });
+    }
+  });
+
+</script>
+{% endblock %}

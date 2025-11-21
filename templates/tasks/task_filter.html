@@ -1,0 +1,214 @@
+{% extends 'app/base.html' %}
+{% load static i18n crispy_forms_tags django_tables2 %}
+{% block title %}{{title}}: {{app_settings.site_title}}{% endblock %}
+
+{% block content %}
+
+<div class="side-app main-container">
+
+    <!--Page header-->
+    <div class="page-header d-flex">
+        <div class="page-leftheader">
+            <div class="page-title">{{title}}</div>
+        </div>
+        <div class="page-rightheader ms-md-auto">
+            <div class="btn-list">
+
+                <a class="btn btn-sm btn-white" data-bs-toggle="offcanvas" href="#offcanvasFilter" 
+                    role="button" aria-controls="offcanvasFilter" title="Filter Data"> <i class="feather feather-filter"></i> </a>
+                {% if can_add %}
+                <a href="{{new_link}}" class="btn btn-sm btn-white" data-bs-placement="top" data-bs-toggle="tooltip"
+                    title="New"> <i class="feather feather-plus"></i></a>
+                {% endif %}
+                {% if table.paginated_rows %}
+                <a href="{% export_url 'xlsx' %}" class="btn btn-sm btn-white" data-bs-placement="top"
+                    data-bs-toggle="tooltip" title="Export"> <i class="feather feather-download-cloud"></i> </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-lg-3 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=todo" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">To Do</h6>
+                            <h5 class="m-0 text_h5_style">{{todo_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=on_going" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">On Going</h6>
+                            <h5 class="m-0 text_h5_style">{{on_going_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=delayed" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">On Going + Delay</h6>
+                            <h5 class="m-0 text_h5_style">{{delayed_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=on_hold" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">On Hold</h6>
+                            <h5 class="m-0 text_h5_style">{{on_hold_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=in_review" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">In Review</h6>
+                            <h5 class="m-0 text_h5_style">{{in_review_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=cancelled" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">Cancelled</h6>
+                            <h5 class="m-0 text_h5_style">{{cancelled_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=rework" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">Re Work</h6>
+                            <h5 class="m-0 text_h5_style">{{rework_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=done" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">Done</h6>
+                            <h5 class="m-0 text_h5_style">{{completed_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="row row-sm">
+        <div class="col-lg-12">
+
+            <div class="card">
+                {% if table.paginated_rows %}
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        {% render_table table %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="card-body">
+                    {{title}} {% translate "list is empty." %}
+                    {% if can_add %}<a href="{{new_link}}">{% translate "Add New One" %}</a>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+
+{% include 'app/partials/filter.html' %}
+{% include 'app/partials/help.html' %}
+
+{% endblock content %}
+
+{% block javascript %}
+<script>
+    isLoading = false;
+    $(document).on("change", ".task_update_form select", function (e) {
+        e.preventDefault();
+        var $this = $(this.closest("form"));
+        data = new FormData($this[0]),
+            action_url = $this.attr("action");
+
+        if (!isLoading) {
+            isLoading = true;
+            var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+            $.ajax({
+                url: action_url,
+                type: "POST",
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                headers: {
+                    "X-CSRFToken": csrfToken
+                },
+                success: function (data) {
+                    var status = data.status;
+                    var title = data.title;
+                    var message = data.message;
+                    if (status == "true") {
+                        console.log("true");
+                    } else {
+                        title ? (title = title) : (title = "An Error Occurred");
+                    }
+                },
+                error: function (data) {
+                    var title = "An error occurred", message = "something went wrong";
+                },
+            }).then(function (response) {
+                isLoading = false;
+            });
+        }
+    });
+
+</script>
+
+{% endblock %}

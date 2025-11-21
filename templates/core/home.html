@@ -1,0 +1,395 @@
+{% extends 'app/base.html' %}
+{% load static i18n crispy_forms_tags django_tables2 extras %}
+{% block title %}Home: {{app_settings.site_title}}{% endblock %}
+
+{% block content %}
+
+<div class="side-app main-container">
+
+    <div class="page-header d-xl-flex d-block">
+        <div class="page-leftheader">
+            <div class="page-title">{% translate "Main Dashboard" %}</div>
+        </div>
+
+        <div class="page-rightheader ms-md-auto">
+            <div class="btn-list">
+                {% if request.user.usertype|user_type_allowed:"management,hrm,hod" %}
+                <a href="{% url 'projects:project_create' %}" class="btn btn-sm btn-white" title="New Project">
+                    New Project
+                </a>
+                <a href="{% url 'tasks:task_create' %}" class="btn btn-sm btn-white" title="New Task">
+                    New Task
+                </a>
+                {% endif %}
+                <a href="{% url 'tasks:task_list' %}?end_before__lte={% now 'd/m/Y' %}" class="btn btn-sm btn-white" title="Today's Tasks">
+                    Today's Tasks
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if request.user.usertype|user_type_allowed:"management,hrm,hod" %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-12">
+                    <div class="marker">
+                        Projects
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'marketing:enquiry_list' %}?status=open" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Open Enquiries</h6>
+                                    <h5 class="m-0 text_h5_style">{{open_enquiries_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'marketing:enquiry_list' %}?status=estimate_sent" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Estimate Sent</h6>
+                                    <h5 class="m-0 text_h5_style">{{estimate_sent_enquiries_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'marketing:enquiry_list' %}?status=closed" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Closed Enquiries</h6>
+                                    <h5 class="m-0 text_h5_style">{{closed_enquiries_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'marketing:enquiry_list' %}?status=rejected" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Rejected Enquiries</h6>
+                                    <h5 class="m-0 text_h5_style">{{rejected_enquiries_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'projects:project_list' %}?status=todo" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Projects not yet Started</h6>
+                                    <h5 class="m-0 text_h5_style">{{todo_projects_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'projects:project_list' %}?status=on_going" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Projects On Going</h6>
+                                    <h5 class="m-0 text_h5_style">{{on_going_projects_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'projects:project_list' %}?status=in_review" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Projects In Review</h6>
+                                    <h5 class="m-0 text_h5_style">{{in_review_projects_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'projects:project_list' %}?status=done" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Completed Projects</h6>
+                                    <h5 class="m-0 text_h5_style">{{done_projects_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-12">
+                    <div class="marker">
+                        Tasks
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'tasks:task_list' %}?status=todo" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">To Do</h6>
+                                    <h5 class="m-0 text_h5_style">{{todo_tasks_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'tasks:task_list' %}?status=on_going" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">On Going</h6>
+                                    <h5 class="m-0 text_h5_style">{{on_going_tasks_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'tasks:task_list' %}?status=delayed" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">On Going + Delay</h6>
+                                    <h5 class="m-0 text_h5_style">{{delayed_tasks_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'tasks:task_list' %}?status=on_hold" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">On Hold</h6>
+                                    <h5 class="m-0 text_h5_style">{{on_hold_tasks_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'tasks:task_list' %}?status=in_review" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">In Review</h6>
+                                    <h5 class="m-0 text_h5_style">{{in_review_tasks_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'tasks:task_list' %}?status=cancelled" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Cancelled</h6>
+                                    <h5 class="m-0 text_h5_style">{{cancelled_tasks_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'tasks:task_list' %}?status=rework" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Re Work</h6>
+                                    <h5 class="m-0 text_h5_style">{{rework_tasks_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                    <div class="card border-radius">
+                        <a href="{% url 'tasks:task_list' %}?status=done" class="">
+                            <div class="card-body d-flex">
+                                <div class="content w-100">
+                                    <h6 class="font-weight-bold">Done</h6>
+                                    <h5 class="m-0 text_h5_style">{{completed_tasks_count}}</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+        
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <div class="row">
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=todo" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">To Do</h6>
+                            <h5 class="m-0 text_h5_style">{{todo_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=on_going" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">On Going</h6>
+                            <h5 class="m-0 text_h5_style">{{on_going_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=delayed" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">On Going + Delay</h6>
+                            <h5 class="m-0 text_h5_style">{{delayed_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=on_hold" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">On Hold</h6>
+                            <h5 class="m-0 text_h5_style">{{on_hold_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=in_review" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">In Review</h6>
+                            <h5 class="m-0 text_h5_style">{{in_review_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=cancelled" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">Cancelled</h6>
+                            <h5 class="m-0 text_h5_style">{{cancelled_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=rework" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">Re Work</h6>
+                            <h5 class="m-0 text_h5_style">{{rework_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <div class="card border-radius">
+                <a href="{% url 'tasks:task_list' %}?status=done" class="">
+                    <div class="card-body d-flex">
+                        <div class="content w-100">
+                            <h6 class="font-weight-bold">Done</h6>
+                            <h5 class="m-0 text_h5_style">{{completed_tasks_count}}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+    {% endif %}
+
+
+    <div class="row row-sm">
+        <div class="col-lg-12">
+
+            <div class="card">
+                {% if table.paginated_rows %}
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        {% render_table table %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="card-body">
+                    {{title}} {% translate "list is empty." %}
+                    {% if can_add %}<a href="{{new_link}}">{% translate "Add New One" %}</a>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+{% endblock content %}

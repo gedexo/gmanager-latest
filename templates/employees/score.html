@@ -1,0 +1,94 @@
+{% extends 'app/base.html' %}
+{% load static i18n crispy_forms_tags %}
+{% block title %}{{object}}: {{app_settings.site_title}}{% endblock %}
+
+{% block content %}
+
+<div class="side-app main-container detail_page">
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card content_card">
+                <div class="card-header">
+                    <div class="card-title d-flex align-items-center w-100">
+                        <h5 class="mb-0">{{object}} - Score</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-around">
+                        <canvas id="score_gauge" style="max-width: 100%;"></canvas>
+                        <div class="content">
+                            <h5 style="border: 1px solid #ccc;padding: 20px;text-align: center;">Your Score is
+                                <strong>{{point}}</strong>
+                            </h5>
+                            In {% now "F Y" %}, you were assigned <strong>{{task_count}}</strong> tasks. At this point,
+                            you have completed <strong>{{done_task_count}}</strong> tasks, and
+                            <strong>{{delayed_task_count}}</strong> of them has been delayed.
+
+                            <div class="table-responsive mt-4">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Year</th>
+                                            <th>Month</th>
+                                            <th>Points</th>
+                                            <th>Reason</th>
+                                        </tr>
+                                    </thead>
+                                    {% for history in point_history %}
+                                    <tr>
+                                        <td>{{history.year}}</td>
+                                        <td>{{history.month}}</td>
+                                        <td>{{history.points}}</td>
+                                        <td>{{history.reason|default:"--"}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block js_plugins %}
+<script src="{% static 'app/plugins/gauge/gauge.min.js' %}"></script>
+{% endblock %}
+{% block javascript %}
+<script>
+    var point = {{ point }};
+    var opts = {
+        angle: -0.09, // The span of the gauge arc
+        lineWidth: 0.07, // The line thickness
+        pointer: {
+            length: 0.5, // // Relative to gauge radius
+            strokeWidth: 0.055, // The thickness
+            color: '#000000' // Fill color
+        },
+        staticLabels: {
+            font: "10px sans-serif",  // Specifies font
+            labels: [0, 200, 500, 700, 800],  // Print labels at these values
+            color: "#000000",  // Optional: Label text color
+            fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+        },
+        generateGradient: true,
+        highDpiSupport: true,
+        staticZones: [
+            { strokeStyle: "#FF0000", min: 0, max: 499 }, // Red from 100 to 130
+            { strokeStyle: "#FFBF00", min: 500, max: 699 }, // Green
+            { strokeStyle: "#FFFF00", min: 700, max: 799 }, // Yellow
+            { strokeStyle: "#00D100", min: 800, max: 1000 }  // Red
+        ],     // High resolution support
+
+    };
+    var target = document.getElementById('score_gauge'); // your canvas element
+    var gauge = new Gauge(target).setOptions(opts);
+    gauge.maxValue = 1000; // set max gauge value
+    gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+    gauge.animationSpeed = 35; // set animation speed (32 is default value)
+    gauge.set(point); // set actual value
+</script>
+{% endblock %}
