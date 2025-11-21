@@ -30,7 +30,7 @@ $(function () {
     });
 
     // $(".offcanvas select").select2({ dropdownParent: "#offcanvasFilter" });
-    
+
     $('.niceselect').select2({
         minimumResultsForSearch: -1,
         placeholder: "Search",
@@ -50,13 +50,13 @@ $(function () {
         })
     });
 
-    $('input.dateinput').bootstrapdatepicker({
-        format: "dd/mm/yyyy",
-        viewMode: "date",
-        multidate: false,
-        multidateSeparator: "-",
-        orientation: "bottom right"
-    });
+    // $('input.dateinput').bootstrapdatepicker({
+    //     format: "dd/mm/yyyy",
+    //     viewMode: "date",
+    //     multidate: false,
+    //     multidateSeparator: "-",
+    //     orientation: "bottom right"
+    // });
 
     // $('input.datetimeinput').bootstrapdatepicker({
     //     format: "dd/mm/yyyy hh:ii",

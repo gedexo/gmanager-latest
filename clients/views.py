@@ -1,7 +1,9 @@
 from core import mixins
 from django.urls import reverse_lazy
+from django.http import JsonResponse
 
 from . import tables
+from .forms import ClientForm
 from .models import Client
 
 
@@ -26,8 +28,28 @@ class ClientDetailView(mixins.HybridDetailView):
 
 class ClientCreateView(mixins.HybridCreateView):
     model = Client
-    exclude = ("creator", "is_active")
-    permissions = ("management", "hrm", "marketing")
+    form_class = ClientForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'id': self.object.pk,
+                'text': self.object.fullname,  
+            })
+        
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            }, status=400)
+        
+        return super().form_invalid(form)
 
 
 class ClientUpdateView(mixins.HybridUpdateView):

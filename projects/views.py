@@ -1,14 +1,18 @@
+import sys
 from django.utils import timezone
 from django.http import JsonResponse
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from core import mixins
 from django.urls import reverse
 from tasks.models import Task
 from tasks.tables import TaskTable
-
-from . import tables
+from tasks.forms import TaskFormSet
+from clients.forms import ClientForm
 from .models import Project, ProjectAttachment
 
+from . import tables
+from . import forms 
 
 class ProjectListView(mixins.HybridListView):
     model = Project
@@ -103,12 +107,48 @@ class ProjectDetailView(mixins.HybridDetailView):
 class ProjectCreateView(mixins.HybridCreateView):
     model = Project
     exclude = ("creator", "is_active")
+    form_class =  forms.ProjectForm
     permissions = ("management", "accounts", "hod")
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["client_form"] = ClientForm()
+        
+        if self.request.POST:
+            context['task_formset'] = TaskFormSet(self.request.POST, prefix='project_tasks')
+        else:
+            context['task_formset'] = TaskFormSet(prefix='project_tasks')
+            
+        return context
+    
+    def form_invalid(self, form):
+        print(">>> PROJECT FORM ERRORS:", form.errors)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        task_formset = context['task_formset']
+        
+        with transaction.atomic():
+            self.object = form.save() 
+            
+            if task_formset.is_valid():
+                task_formset.instance = self.object
+                task_formset.save()
+            else:
+                print(">>> TASK FORMSET ERRORS:")
+                print(task_formset.errors) 
+                print(">>> NON-FORM ERRORS:", task_formset.non_form_errors())
+                
+                return self.render_to_response(self.get_context_data(form=form))
+                
+        return super().form_valid(form)
 
 
 class ProjectUpdateView(mixins.HybridUpdateView):
     model = Project
     exclude = ("creator", "is_active")
+    form_class = forms.ProjectForm
     permissions = ("management", "accounts", "hod")
 
     def get_queryset(self):
@@ -124,6 +164,65 @@ class ProjectUpdateView(mixins.HybridUpdateView):
             return self.model.objects.filter(is_active=True, department=self.request.user.employee.department)
         else:
             return self.model.objects.none()
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["client_form"] = ClientForm()
+        
+        if self.request.POST:
+            context['task_formset'] = TaskFormSet(
+                self.request.POST, 
+                self.request.FILES,  # Add this for file uploads
+                instance=self.object, 
+                prefix='project_tasks'
+            )
+        else:
+            context['task_formset'] = TaskFormSet(
+                instance=self.object, 
+                prefix='project_tasks'
+            )
+            
+        return context
+    
+    def form_invalid(self, form):
+        print(">>> PROJECT UPDATE FORM ERRORS:", form.errors)
+        print(">>> PROJECT STATUS VALUE:", form.data.get('status'))
+        return super().form_invalid(form)
+    
+    def form_valid(self, form):
+        context = self.get_context_data()
+        task_formset = context['task_formset']
+        
+        print(">>> STATUS IN FORM VALID:", form.cleaned_data.get('status'))
+        print(">>> FORM DATA:", form.cleaned_data)
+        
+        with transaction.atomic():
+            self.object = form.save()
+            
+            if task_formset.is_valid():
+                instances = task_formset.save(commit=False)
+                for instance in instances:
+                    instance.project = self.object
+                    instance.save()
+                # Save many-to-many data if any
+                task_formset.save_m2m()
+                
+                # Handle deleted forms
+                for form in task_formset.deleted_forms:
+                    if form.instance.pk:
+                        form.instance.delete()
+            else:
+                print(">>> TASK FORMSET ERRORS:")
+                for i, form in enumerate(task_formset.forms):
+                    if form.errors:
+                        print(f"Form {i} errors: {form.errors}")
+                        # Print each field error
+                        for field, errors in form.errors.items():
+                            print(f"  {field}: {errors}")
+                print(">>> NON-FORM ERRORS:", task_formset.non_form_errors())
+                return self.form_invalid(form)
+                
+        return super().form_valid(form)
 
 
 class ProjectDeleteView(mixins.HybridDeleteView):

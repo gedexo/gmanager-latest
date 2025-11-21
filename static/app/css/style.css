@@ -698,7 +698,7 @@ body {
     justify-content: flex-start;
     position: relative;
     overflow-y: scroll;
-    background-image: url('../config/bg/tornado.svg')
+    /* background-image: url('../config/bg/tornado.svg') */
 }
 
 hr {
@@ -53775,4 +53775,20 @@ a.text-dark:focus {
 
 .w-200 {
     width: 200px;
+}
+
+.card.custom-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    word-wrap: break-word;
+    background-clip: border-box;
+    position: relative;
+    background-color: #fff !important;
+    margin-block-end: 1.5rem;
+    width: 100%;
+    border: 0;
+    box-shadow: 0 .15rem 1.75rem 0 rgba(196, 205, 224, .2) !important;
+    border-radius: .813rem !important;
+    width: 100%;
 }

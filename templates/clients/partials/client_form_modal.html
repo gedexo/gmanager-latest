@@ -1,0 +1,24 @@
+{% load static crispy_forms_tags %}
+
+<div class="modal fade" id="client-form-modal" tabindex="-1" aria-labelledby="client-form-modalLabel"
+    aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="client-form-modalLabel">Client Form</h5>
+                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal row justify-content-between" method="post" action="{% url 'clients:client_create' %}" id="client-form">
+                    {% csrf_token %}
+                    {{ client_form|crispy }}
+                    <div class="modal-footer mt-4">
+                        <button type="button" class="btn btn-outline-grey" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

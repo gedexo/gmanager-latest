@@ -63,6 +63,7 @@ class TaskDetailView(mixins.HybridDetailView):
         context["new_link"] = reverse("tasks:task_create")
         return context
 
+
 class TaskCreateView(mixins.HybridCreateView):
     model = Task
     exclude = ("creator", "is_active", "completed_on")
