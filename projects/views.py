@@ -9,6 +9,7 @@ from tasks.models import Task
 from tasks.tables import TaskTable
 from tasks.forms import TaskFormSet
 from clients.forms import ClientForm
+from marketing.models import Enquiry
 from .models import Project, ProjectAttachment
 
 from . import tables
@@ -50,9 +51,16 @@ class ProjectListView(mixins.HybridListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        usertype = self.request.user.usertype
         context["title"] = "Projects"
         context["can_add"] = mixins.check_access(self.request, ("management", "hrm", "hod"))
         context["new_link"] = reverse("projects:project_create")
+
+        if usertype in ("management", "hrm", "hod"):
+            context["todo_projects_count"] = Project.objects.filter(status="todo").count()
+            context["on_going_projects_count"] = Project.objects.filter(status="on_going").count()
+            context["in_review_projects_count"] = Project.objects.filter(status="in_review").count()
+            context["done_projects_count"] = Project.objects.filter(status__in=("done", "delivered")).count()
         return context
 
 

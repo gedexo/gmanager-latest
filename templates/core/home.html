@@ -30,14 +30,14 @@
 
     {% if request.user.usertype|user_type_allowed:"management,hrm,hod" %}
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="row">
                 <div class="col-12">
                     <div class="marker">
-                        Projects
+                        Projects & Tasks Overview
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-6 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'marketing:enquiry_list' %}?status=open" class="">
                             <div class="card-body d-flex">
@@ -50,59 +50,7 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                    <div class="card border-radius">
-                        <a href="{% url 'marketing:enquiry_list' %}?status=estimate_sent" class="">
-                            <div class="card-body d-flex">
-                                <div class="content w-100">
-                                    <h6 class="font-weight-bold">Estimate Sent</h6>
-                                    <h5 class="m-0 text_h5_style">{{estimate_sent_enquiries_count}}</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-        
-                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                    <div class="card border-radius">
-                        <a href="{% url 'marketing:enquiry_list' %}?status=closed" class="">
-                            <div class="card-body d-flex">
-                                <div class="content w-100">
-                                    <h6 class="font-weight-bold">Closed Enquiries</h6>
-                                    <h5 class="m-0 text_h5_style">{{closed_enquiries_count}}</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-        
-                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                    <div class="card border-radius">
-                        <a href="{% url 'marketing:enquiry_list' %}?status=rejected" class="">
-                            <div class="card-body d-flex">
-                                <div class="content w-100">
-                                    <h6 class="font-weight-bold">Rejected Enquiries</h6>
-                                    <h5 class="m-0 text_h5_style">{{rejected_enquiries_count}}</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-        
-                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                    <div class="card border-radius">
-                        <a href="{% url 'projects:project_list' %}?status=todo" class="">
-                            <div class="card-body d-flex">
-                                <div class="content w-100">
-                                    <h6 class="font-weight-bold">Projects not yet Started</h6>
-                                    <h5 class="m-0 text_h5_style">{{todo_projects_count}}</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-        
-                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-6 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'projects:project_list' %}?status=on_going" class="">
                             <div class="card-body d-flex">
@@ -115,42 +63,8 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                    <div class="card border-radius">
-                        <a href="{% url 'projects:project_list' %}?status=in_review" class="">
-                            <div class="card-body d-flex">
-                                <div class="content w-100">
-                                    <h6 class="font-weight-bold">Projects In Review</h6>
-                                    <h5 class="m-0 text_h5_style">{{in_review_projects_count}}</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-        
-                <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                    <div class="card border-radius">
-                        <a href="{% url 'projects:project_list' %}?status=done" class="">
-                            <div class="card-body d-flex">
-                                <div class="content w-100">
-                                    <h6 class="font-weight-bold">Completed Projects</h6>
-                                    <h5 class="m-0 text_h5_style">{{done_projects_count}}</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-6">
-            <div class="row">
-                <div class="col-12">
-                    <div class="marker">
-                        Tasks
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-4 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'tasks:task_list' %}?status=todo" class="">
                             <div class="card-body d-flex">
@@ -163,7 +77,7 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-4 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'tasks:task_list' %}?status=on_going" class="">
                             <div class="card-body d-flex">
@@ -176,7 +90,7 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-4 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'tasks:task_list' %}?status=delayed" class="">
                             <div class="card-body d-flex">
@@ -189,7 +103,7 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-4 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'tasks:task_list' %}?status=on_hold" class="">
                             <div class="card-body d-flex">
@@ -202,7 +116,7 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-4 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'tasks:task_list' %}?status=in_review" class="">
                             <div class="card-body d-flex">
@@ -215,7 +129,7 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-4 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'tasks:task_list' %}?status=cancelled" class="">
                             <div class="card-body d-flex">
@@ -228,7 +142,7 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-4 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'tasks:task_list' %}?status=rework" class="">
                             <div class="card-body d-flex">
@@ -241,7 +155,7 @@
                     </div>
                 </div>
         
-                <div class="col-lg-3 col-md-6 col-sm-4 col-6">
+                <div class="col-lg-2 col-md-6 col-sm-4 col-6">
                     <div class="card border-radius">
                         <a href="{% url 'tasks:task_list' %}?status=done" class="">
                             <div class="card-body d-flex">
@@ -253,7 +167,7 @@
                         </a>
                     </div>
                 </div>
-        
+
             </div>
         </div>
     </div>
@@ -387,8 +301,6 @@
             </div>
         </div>
     </div>
-
-
 
 </div>
 

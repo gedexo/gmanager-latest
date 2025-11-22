@@ -2,43 +2,210 @@
 {% load static i18n crispy_forms_tags django_tables2 extras %}
 {% block title %}{{object}}: {{app_settings.site_title}}{% endblock %}
 
+{% block css_plugins %}
+<link rel="stylesheet" href="/static/app/plugins/calendar/calendar.css">
+<style>
+    /* --- GLOBAL VARIABLES --- */
+    :root {
+        --board-bg: #ffffff;
+        --column-bg: #f4f5f7; /* Standard Jira/Trello Column Gray */
+        --card-bg: #ffffff;
+        --text-dark: #172b4d;
+        --text-muted: #6b778c;
+        --shadow-card: 0 1px 2px rgba(9, 30, 66, 0.25);
+        --shadow-hover: 0 4px 8px -2px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31);
+    }
+
+    /* --- SCROLLBARS --- */
+    .custom-scroll::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+        background-color: rgba(9, 30, 66, 0.08);
+        border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background-color: rgba(9, 30, 66, 0.25);
+        border-radius: 4px;
+    }
+
+    /* --- BOARD LAYOUT --- */
+    .kanban-board-container {
+        display: flex;
+        overflow-x: auto;
+        height: calc(100vh - 240px); /* Dynamic height */
+        min-height: 600px;
+        padding-bottom: 20px;
+        align-items: flex-start;
+    }
+
+    .kanban-column {
+        display: flex;
+        flex-direction: column;
+        min-width: 280px;
+        max-width: 280px;
+        background-color: #ffff;
+        border-radius: 3px; /* Slightly square like Jira */
+        margin-right: 12px;
+        max-height: 100%;
+    }
+
+    /* --- COLUMN HEADER --- */
+    .kanban-header {
+        padding: 12px 12px 8px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #5e6c84;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+    }
+
+    .task-count {
+        background-color: rgba(9, 30, 66, 0.08);
+        color: #172b4d;
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 2em;
+        font-weight: 700;
+    }
+
+    /* --- COLUMN BODY --- */
+    .kanban-body {
+        padding: 0 8px 8px 8px;
+        flex: 1;
+        overflow-y: auto;
+        min-height: 100px;
+    }
+
+    /* --- STANDARD TASK CARD --- */
+    .kanban-card {
+        background-color: var(--card-bg);
+        border-radius: 3px;
+        box-shadow: var(--shadow-card);
+        padding: 10px;
+        margin-bottom: 8px;
+        cursor: grab;
+        transition: background 0.1s, box-shadow 0.1s;
+        border: none;
+        position: relative;
+        text-decoration: none;
+        display: block;
+    }
+
+    .kanban-card:hover {
+        box-shadow: var(--shadow-hover);
+        background-color: #fafbfc;
+    }
+
+    .card-title {
+        color: var(--text-dark);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.4;
+        margin-bottom: 6px;
+        word-wrap: break-word;
+    }
+
+    .card-description {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* --- CARD FOOTER & TAGS --- */
+    .card-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+    }
+
+    .meta-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .date-badge {
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 600;
+    }
+
+    /* Status Colors for Date Badges */
+    .badge-neutral { background: #dfe1e6; color: #42526e; } /* Gray */
+    .badge-overdue { background: #ffebe6; color: #de350b; } /* Red */
+    .badge-due-soon { background: #fff0b3; color: #172b4d; } /* Yellow */
+    .badge-done { background: #e3fcef; color: #006644; } /* Green */
+
+    .user-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    /* --- OVERVIEW TAB STYLES (kept as requested) --- */
+    .info-card {
+        background: #f9fafb;
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #eaeaea;
+        height: 100%;
+    }
+    .info-label { font-size: 12px; text-transform: uppercase; color: #888; margin-bottom: 5px; }
+    .info-value { font-size: 15px; font-weight: 600; color: #333; }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="side-app main-container detail_page">
 
   <!--Page header-->
-  <div class="page-header row align-items-center">
+  <div class="page-header row align-items-center mb-5">
 
     <div class="page-leftheader col-md-6 ps-0">
-      <div class="page-title">{{object}}</div>
+      <h4 class="page-title mb-0 fw-bold">{{object}}</h4>
     </div>
 
     <div class="page-rightheader ms-md-auto col-md-6 pe-0">
       <div class="text-md-end text-center btn-list">
         <div class="nav nav-pills justify-content-end" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          
           <button class="nav-link btn btn-pill me-2 mb-1 active" id="v-pills-overview-tab" data-bs-toggle="pill"
             data-bs-target="#v-pills-overview" type="button" role="tab" aria-controls="v-pills-overview"
-            aria-selected="true">Overview</button>
+            aria-selected="true">
+            <i class="feather feather-grid me-1"></i> Overview
+          </button>
+
           <button class="nav-link btn btn-pill me-2 mb-1" id="v-pills-tasks-tab" data-bs-toggle="pill"
             data-bs-target="#v-pills-tasks" type="button" role="tab" aria-controls="v-pills-tasks"
-            aria-selected="false">Tasks</button>
-          <button class="nav-link btn btn-pill me-2 mb-1" id="v-pills-table-tab" data-bs-toggle="pill"
-            data-bs-target="#v-pills-table" type="button" role="tab" aria-controls="v-pills-table"
-            aria-selected="false">Table</button>
-          <!-- <button class="nav-link btn btn-pill me-2 mb-1" id="v-pills-calendar-tab" data-bs-toggle="pill"
-            data-bs-target="#v-pills-calendar" type="button" role="tab" aria-controls="v-pills-calendar"
-            aria-selected="false">Calendar</button> -->
+            aria-selected="false">
+            <i class="feather feather-trello me-1"></i> Task Board
+          </button>
 
           {% if object.discord_url %}
-          <a href="{{object.discord_url}}" target="_blank" class="btn me-2 mb-1 btn-white px-2 d-flex align-items-center"
-            title="Slack" style="width: 90px;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0.9 0.9 725.6 198.3"><g fill="#7289da"><path d="M106.8 84.1c-5.7 0-10.2 4.9-10.2 11s4.6 11 10.2 11c5.7 0 10.2-4.9 10.2-11s-4.6-11-10.2-11zm-36.5 0c-5.7 0-10.2 4.9-10.2 11s4.6 11 10.2 11c5.7 0 10.2-4.9 10.2-11 .1-6.1-4.5-11-10.2-11z"/><path d="M155.4.9h-134C10.1.9.9 10.1.9 21.4v134c0 11.3 9.2 20.5 20.5 20.5h113.4l-5.3-18.3 12.8 11.8 12.1 11.1 21.6 18.7V21.4C175.9 10.1 166.7.9 155.4.9zm-38.6 129.5s-3.6-4.3-6.6-8c13.1-3.7 18.1-11.8 18.1-11.8-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.4-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.6-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.2-1.8-1-2.8-1.7-2.8-1.7s4.8 7.9 17.5 11.7c-3 3.8-6.7 8.2-6.7 8.2-22.1-.7-30.5-15.1-30.5-15.1C30.6 83.5 45 57.6 45 57.6c14.4-10.7 28-10.4 28-10.4l1 1.2c-18 5.1-26.2 13-26.2 13s2.2-1.2 5.9-2.8c10.7-4.7 19.2-5.9 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.5 0 0-7.9-7.5-24.9-12.6l1.4-1.6s13.7-.3 28 10.4c0 0 14.4 25.9 14.4 57.8 0-.1-8.4 14.3-30.5 15zm151-86.7h-33.2V81l22.1 19.9V64.7h11.8c7.5 0 11.2 3.6 11.2 9.4v27.7c0 5.8-3.5 9.7-11.2 9.7h-34v21.1h33.2c17.8.1 34.5-8.8 34.5-29.2V73.6c.1-20.8-16.6-29.9-34.4-29.9zm174 59.7V72.8c0-11 19.8-13.5 25.8-2.5l18.3-7.4c-7.2-15.8-20.3-20.4-31.2-20.4-17.8 0-35.4 10.3-35.4 30.3v30.6c0 20.2 17.6 30.3 35 30.3 11.2 0 24.6-5.5 32-19.9l-19.6-9c-4.8 12.3-24.9 9.3-24.9-1.4zM381.3 77c-6.9-1.5-11.5-4-11.8-8.3.4-10.3 16.3-10.7 25.6-.8l14.7-11.3c-9.2-11.2-19.6-14.2-30.3-14.2-16.3 0-32.1 9.2-32.1 26.6 0 16.9 13 26 27.3 28.2 7.3 1 15.4 3.9 15.2 8.9-.6 9.5-20.2 9-29.1-1.8l-14.2 13.3c8.3 10.7 19.6 16.1 30.2 16.1 16.3 0 34.4-9.4 35.1-26.6 1-21.7-14.8-27.2-30.6-30.1zm-67 55.5h22.4V43.7h-22.4zM692 43.7h-33.2V81l22.1 19.9V64.7h11.8c7.5 0 11.2 3.6 11.2 9.4v27.7c0 5.8-3.5 9.7-11.2 9.7h-34v21.1H692c17.8.1 34.5-8.8 34.5-29.2V73.6c0-20.8-16.7-29.9-34.5-29.9zm-162.9-1.2c-18.4 0-36.7 10-36.7 30.5v30.3c0 20.3 18.4 30.5 36.9 30.5 18.4 0 36.7-10.2 36.7-30.5V73c0-20.4-18.5-30.5-36.9-30.5zm14.4 60.8c0 6.4-7.2 9.7-14.3 9.7-7.2 0-14.4-3.1-14.4-9.7V73c0-6.5 7-10 14-10 7.3 0 14.7 3.1 14.7 10zM646.4 73c-.5-20.8-14.7-29.2-33-29.2h-35.5v88.8h22.7v-28.2h4l20.6 28.2h28L629 102.1c10.7-3.4 17.4-12.7 17.4-29.1zm-32.6 12h-13.2V64.7h13.2c14.1 0 14.1 20.3 0 20.3z"/></g></svg>
+          <a href="{{object.discord_url}}" target="_blank" class="btn me-2 mb-1 btn-outline-primary d-flex align-items-center justify-content-center"
+            title="Join Discord" style="width: 40px; height: 38px; padding: 0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#5865F2" d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
           </a>
           {% endif %}
 
-          <!-- <a href="javascript:void(0);" onclick="window.print();" class="btn me-2 mb-1 btn-white" title="Print"> <i
-              class="feather feather-printer"></i>
-          </a> -->
           {% if can_edit %}
           <a href="{{object.get_update_url}}" class="btn me-2 mb-1 btn-white" data-bs-placement="top"
             data-bs-toggle="tooltip" title="Edit"> <i class="text-primary feather feather-edit-3"></i> </a>
@@ -50,50 +217,67 @@
           {% endif %}
 
         </div>
-
       </div>
     </div>
   </div>
   <!--End Page header-->
 
-  <div class="tab-content w-100 mt-5" id="v-pills-tabContent">
+  <div class="tab-content w-100" id="v-pills-tabContent">
+    
+    <!-- OVERVIEW TAB (Kept as requested) -->
     <div class="tab-pane fade show active" id="v-pills-overview" role="tabpanel" aria-labelledby="v-pills-overview-tab">
       <div class="row">
+        <!-- Project Info -->
+        <div class="col-md-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-bottom">
+                    <h4 class="card-title mb-0">Project Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="info-card">
+                                <div class="info-label"><i class="feather feather-calendar me-1"></i> Start Date</div>
+                                <div class="info-value">{{object.start_date|default:"-"}}</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="info-card">
+                                <div class="info-label"><i class="feather feather-calendar me-1"></i> End Date</div>
+                                <div class="info-value">{{object.end_date|default:"-"}}</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="info-card">
+                                <div class="info-label"><i class="feather feather-briefcase me-1"></i> Department</div>
+                                <div class="info-value">{{object.department|default:"-"}}</div>
+                            </div>
+                        </div>
+                        {% if request.user.usertype == 'management' %}
+                        <div class="col-6 col-md-3">
+                            <div class="info-card">
+                                <div class="info-label"><i class="feather feather-check-circle me-1"></i> Delivery</div>
+                                <div class="info-value">{{object.delivery_date|default:"Pending"}}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
 
-        <div class="col-md-12">
-          <div class="card content_card">
-
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table table-hover info_table mb-0 border" style="width:100%;">
-                  <tbody>
-                    <tr>
-                      <td>Start Date : {{object.start_date}}</td>
-                      <td>End Date : {{object.end_date}}</td>
-                      <td>Department : {{object.department}}</td>
-                      {% if request.user.usertype == 'management' %}
-                      <td>Delivery Date : {{object.delivery_date}}</td>
-                      <td>Referred By : {{object.referred_by}}</td>
-                      {% endif %}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                    {% if object.details %}
+                    <div class="mt-4 p-3 bg-light rounded border">
+                        <h6 class="fw-bold text-uppercase text-muted fs-12 mb-2">Description & Notes</h6>
+                        <div class="text-dark">{{object.details|safe}}</div>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-
-            {% if object.details %}
-            <div class="card-body">
-              {{object.details|safe}}
-            </div>
-            {% endif %}
-
-          </div>
         </div>
 
+        <!-- Attachments -->
         {% if attachments_table.paginated_rows %}
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-header">
+        <div class="col-md-12 mb-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent">
               <h5 class="mb-0">Attachments</h5>
             </div>
             <div class="card-body p-0">
@@ -105,249 +289,195 @@
         </div>
         {% endif %}
 
+        <!-- Task Table -->
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center w-100 bg-transparent">
+                <h5 class="mb-0">Task List</h5>
+                {% if can_add %}
+                <a href="{{new_link}}" class="btn btn-sm btn-primary btn-pill">
+                  <i class="feather feather-plus me-1"></i> Add New Task
+                </a>
+                {% endif %}
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  {% render_table table 'django_tables2/basic.html' %}
+                </div>
+              </div>
+            </div>
+          </div>
       </div>
-
     </div>
+
+    <!-- TASK BOARD TAB (Redesigned) -->
     <div class="tab-pane fade" id="v-pills-tasks" role="tabpanel" aria-labelledby="v-pills-tasks-tab">
-      <div class="d-flex flex-nowrap" style="overflow-x: scroll;min-height: 85vh;">
+        <div class="kanban-board-container custom-scroll">
 
-
-        <div class="card-parent" data-status="todo">
-          <div class="card">
-
-            <div class="list-header">
-              <h2 class="header-name">To Do</h2>
+            <!-- TODO Column -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span>To Do</span>
+                    <span class="task-count">{{ tasks|filter_by_status:"todo"|length }}</span>
+                </div>
+                <div class="kanban-body custom-scroll">
+                    {% for task in tasks|filter_by_status:"todo" %}
+                    <div class="kanban-card" draggable="true">
+                        <div class="card-title">{{task.title}}</div>
+                        <div class="card-description">{{task.description|default:''}}</div>
+                        <div class="card-meta">
+                            <div class="meta-left">
+                                <span class="date-badge badge-neutral" title="Start Date">
+                                    <i class="feather feather-calendar" style="font-size: 10px;"></i> 
+                                    {{task.start_from|default:"No Date"}}
+                                </span>
+                            </div>
+                            <img src="{{task.assigned_to.get_image_url|default:'/static/assets/images/users/avatar.jpg'}}" class="user-avatar" title="{{task.assigned_to}}">
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center mt-3 text-muted fs-12">No tasks yet</div>
+                    {% endfor %}
+                </div>
+                <div class="p-2">
+                    <a href="{{new_link}}" class="btn btn-light btn-sm w-100 text-muted"><i class="feather feather-plus"></i> Create</a>
+                </div>
             </div>
-            {% for task in tasks|filter_by_status:"todo" %}
-            <div class="subcard">
-              <div>
-                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
-              </div>
-              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
-              <div class="d-flex justify-content-start">
-                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
-                  title="{{task.assigned_to}}">
-                {% if task.start_from == task.end_before %}
-                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
-                {% else %}
-                <span class=" badge bg-success me-1">{{task.start_from}}</span>
-                <span class="badge bg-danger me-1">{{task.end_before}}</span>
-                {% endif %}
-              </div>
-            </div>
-            {% endfor %}
 
-            <div class="list-footer">
-              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
+            <!-- ON GOING Column -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="text-primary">In Progress</span>
+                    <span class="task-count">{{ tasks|filter_by_status:"on_going"|length }}</span>
+                </div>
+                <div class="kanban-body custom-scroll">
+                    {% for task in tasks|filter_by_status:"on_going" %}
+                    <div class="kanban-card" draggable="true">
+                        <div class="card-title">{{task.title}}</div>
+                        <div class="card-description">{{task.description|default:''}}</div>
+                        <div class="card-meta">
+                            <div class="meta-left">
+                                {% if task.end_before %}
+                                    <span class="date-badge badge-due-soon" title="Due Date">
+                                        <i class="feather feather-clock" style="font-size: 10px;"></i> {{task.end_before}}
+                                    </span>
+                                {% else %}
+                                    <span class="date-badge badge-neutral">No deadline</span>
+                                {% endif %}
+                            </div>
+                            <img src="{{task.assigned_to.get_image_url|default:'/static/assets/images/users/avatar.jpg'}}" class="user-avatar" title="{{task.assigned_to}}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
 
-          </div>
+            <!-- DELAYED Column -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="text-danger">Delayed</span>
+                    <span class="task-count">{{ tasks|filter_by_status:"delayed"|length }}</span>
+                </div>
+                <div class="kanban-body custom-scroll">
+                    {% for task in tasks|filter_by_status:"delayed" %}
+                    <div class="kanban-card" draggable="true">
+                        <div class="card-title">{{task.title}}</div>
+                        <div class="card-description">{{task.description|default:''}}</div>
+                        <div class="card-meta">
+                            <div class="meta-left">
+                                <span class="date-badge badge-overdue" title="Deadline Missed">
+                                    <i class="feather feather-alert-circle" style="font-size: 10px;"></i> {{task.end_before}}
+                                </span>
+                            </div>
+                            <img src="{{task.assigned_to.get_image_url|default:'/static/assets/images/users/avatar.jpg'}}" class="user-avatar" title="{{task.assigned_to}}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ON HOLD Column -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="text-warning">On Hold</span>
+                    <span class="task-count">{{ tasks|filter_by_status:"on_hold"|length }}</span>
+                </div>
+                <div class="kanban-body custom-scroll">
+                    {% for task in tasks|filter_by_status:"on_hold" %}
+                    <div class="kanban-card" draggable="true">
+                        <div class="card-title">{{task.title}}</div>
+                        <div class="card-description">{{task.description|default:''}}</div>
+                        <div class="card-meta">
+                            <div class="meta-left">
+                                <span class="date-badge badge-neutral">Paused</span>
+                            </div>
+                            <img src="{{task.assigned_to.get_image_url|default:'/static/assets/images/users/avatar.jpg'}}" class="user-avatar" title="{{task.assigned_to}}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- IN REVIEW Column -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="text-info">Review</span>
+                    <span class="task-count">{{ tasks|filter_by_status:"in_review"|length }}</span>
+                </div>
+                <div class="kanban-body custom-scroll">
+                    {% for task in tasks|filter_by_status:"in_review" %}
+                    <div class="kanban-card" draggable="true">
+                        <div class="card-title">{{task.title}}</div>
+                        <div class="card-description">{{task.description|default:''}}</div>
+                        <div class="card-meta">
+                            <div class="meta-left">
+                                <span class="date-badge badge-due-soon">
+                                    <i class="feather feather-eye" style="font-size: 10px;"></i> Reviewing
+                                </span>
+                            </div>
+                            <img src="{{task.assigned_to.get_image_url|default:'/static/assets/images/users/avatar.jpg'}}" class="user-avatar" title="{{task.assigned_to}}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- DONE Column -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="text-success">Done</span>
+                    <span class="task-count">{{ tasks|filter_by_status:"done"|length }}</span>
+                </div>
+                <div class="kanban-body custom-scroll">
+                    {% for task in tasks|filter_by_status:"done" %}
+                    <div class="kanban-card" draggable="true" style="opacity: 0.8; background: #f9f9f9;">
+                        <div class="card-title text-muted text-decoration-line-through">{{task.title}}</div>
+                        <div class="card-meta">
+                            <div class="meta-left">
+                                <span class="date-badge badge-done">
+                                    <i class="feather feather-check" style="font-size: 10px;"></i> Complete
+                                </span>
+                            </div>
+                            <img src="{{task.assigned_to.get_image_url|default:'/static/assets/images/users/avatar.jpg'}}" class="user-avatar" title="{{task.assigned_to}}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
-
-
-        <div class="card-parent" data-status="on_going">
-          <div class="card">
-            <div class="list-header">
-              <h2 class="header-name">On Going</h2>
-            </div>
-            {% for task in tasks|filter_by_status:"on_going" %}
-            <div class="subcard" draggable="true">
-              <div>
-                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
-              </div>
-              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
-              <div class="d-flex justify-content-start">
-                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
-                  title="{{task.assigned_to}}">
-                {% if task.start_from == task.end_before %}
-                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
-                {% else %}
-                <span class=" badge bg-success me-1">{{task.start_from}}</span>
-                <span class="badge bg-danger me-1">{{task.end_before}}</span>
-                {% endif %}
-              </div>
-            </div>
-            {% endfor %}
-            <div class="list-footer">
-              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
-            </div>
-          </div>
-        </div>
-
-
-        <div class="card-parent" data-status="delayed">
-          <div class="card">
-            <div class="list-header">
-              <h2 class="header-name">On Going + Delay</h2>
-            </div>
-            {% for task in tasks|filter_by_status:"delayed" %}
-            <div class="subcard" draggable="true">
-              <div>
-                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
-              </div>
-              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
-              <div class="d-flex justify-content-start">
-                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
-                  title="{{task.assigned_to}}">
-                {% if task.start_from == task.end_before %}
-                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
-                {% else %}
-                <span class=" badge bg-success me-1">{{task.start_from}}</span>
-                <span class="badge bg-danger me-1">{{task.end_before}}</span>
-                {% endif %}
-              </div>
-            </div>
-            {% endfor %}
-            <div class="list-footer">
-              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
-            </div>
-          </div>
-        </div>
-
-
-        <div class="card-parent" data-status="on_hold">
-          <div class="card">
-            <div class="list-header">
-              <h2 class="header-name">On
-                Hold</h2>
-            </div>
-            {% for task in tasks|filter_by_status:"on_hold" %}
-            <div class="subcard" draggable="true">
-              <div>
-                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
-              </div>
-              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
-              <div class="d-flex justify-content-start">
-                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
-                  title="{{task.assigned_to}}">
-                {% if task.start_from == task.end_before %}
-                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
-                {% else %}
-                <span class=" badge bg-success me-1">{{task.start_from}}</span>
-                <span class="badge bg-danger me-1">{{task.end_before}}</span>
-                {% endif %}
-              </div>
-            </div>
-            {% endfor %}
-            <div class="list-footer">
-              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-parent" data-status="in_review">
-          <div class="card">
-            <div class="list-header">
-              <h2 class="header-name">In Review</h2>
-            </div>
-            {% for task in tasks|filter_by_status:"in_review" %}
-            <div class="subcard" draggable="true">
-              <div>
-                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
-              </div>
-              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
-              <div class="d-flex justify-content-start">
-                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
-                  title="{{task.assigned_to}}">
-                {% if task.start_from == task.end_before %}
-                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
-                {% else %}
-                <span class=" badge bg-success me-1">{{task.start_from}}</span>
-                <span class="badge bg-danger me-1">{{task.end_before}}</span>
-                {% endif %}
-              </div>
-            </div>
-            {% endfor %}
-            <div class="list-footer">
-              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-parent" data-status="done">
-          <div class="card">
-            <div class="list-header">
-              <h2 class="header-name">Done</h2>
-            </div>
-            {% for task in tasks|filter_by_status:"done" %}
-            <div class="subcard" draggable="true">
-              <div>
-                <h4 class="fs-14 fw-bold">{{task.title}}</h4>
-              </div>
-              <div class="fs-12 mb-2">{{task.description|linebreaksbr|urlize}}</div>
-              <div class="d-flex justify-content-start">
-                <img src="{{task.assigned_to.get_image_url}}" alt="" class="avatar-sm me-1"
-                  title="{{task.assigned_to}}">
-                {% if task.start_from == task.end_before %}
-                <span class=" badge bg-warning me-1">{{task.start_from}}</span>
-                {% else %}
-                <span class=" badge bg-success me-1">{{task.start_from}}</span>
-                <span class="badge bg-danger me-1">{{task.end_before}}</span>
-                {% endif %}
-              </div>
-            </div>
-            {% endfor %}
-            <div class="list-footer">
-              <a href="#"><i class="feather feather-plus"></i> Add a Card</a>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
-    <div class="tab-pane fade" id="v-pills-table" role="tabpanel" aria-labelledby="v-pills-table-tab">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between w-100">
-              <h5 class="mb-0">Tasks</h5>
-              {% if can_add %}
-              <a href="{{new_link}}" class="btn btn-sm btn-white">
-                <i class="text-primary feather feather-plus"></i>
-              </a>
-              {% endif %}
-            </div>
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                {% render_table table 'django_tables2/basic.html' %}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="tab-pane fade" id="v-pills-calendar" role="tabpanel" aria-labelledby="v-pills-calendar-tab">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Calendar</h5>
-            </div>
-            <div class="card-body p-0">
-              <div class='cal1'></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
   </div>
-
-</div>
-
 </div>
 
 <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
 {% endblock content %}
 
-{% block css_plugins %}
-<link rel="stylesheet" href="/static/app/plugins/calendar/calendar.css">
-{% endblock %}
-
 {% block js_plugins %}
 <script src="/static/app/plugins/calendar/underscore-min.js"></script>
 <script src="/static/app/plugins/calendar/moment.js"></script>
 <script src="/static/app/plugins/calendar/calendar.js"></script>
-<script src="/static/app/plugins/calendar/demo.js"></script>
 {% endblock %}
 
 {% block javascript %}
@@ -370,27 +500,17 @@
         contentType: false,
         processData: false,
         dataType: "json",
-        headers: {
-          "X-CSRFToken": csrfToken
-        },
+        headers: { "X-CSRFToken": csrfToken },
         success: function (data) {
-          var status = data.status;
-          var title = data.title;
-          var message = data.message;
-          if (status == "success") {
+          if (data.status == "success") {
             window.location.reload();
-          } else {
-            title ? (title = title) : (title = "An Error Occurred");
           }
         },
-        error: function (data) {
-          var title = "An error occurred", message = "something went wrong";
-        },
+        error: function (data) { console.log("Error"); },
       }).then(function (response) {
         isLoading = false;
       });
     }
   });
-
 </script>
 {% endblock %}
